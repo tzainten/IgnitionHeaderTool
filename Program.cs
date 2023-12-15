@@ -7,30 +7,6 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        if (true)
-        {
-            List<string> paths = Directory.GetDirectories(@"C:\Users\Work\Environment\Dev\Git\VoxelPlugin\Source").ToList();
-            foreach (var path in paths)
-            {
-                if (!Directory.Exists($@"{path}\Public"))
-                    continue;
-
-                foreach (var headerFile in Directory.GetFiles($@"{path}\Public", "*.h", SearchOption.AllDirectories))
-                {
-                    string fileContents = File.ReadAllText(headerFile);
-
-                    Parser parser = new();
-                    if (parser.Parse(fileContents))
-                    {
-                        if (parser.Classes.Count > 0)
-                            Console.WriteLine($"{parser.Classes[0].Identifier} :: {parser.Classes.Count}");
-                    }
-                }
-            }
-
-            return;
-        }
-
         Stopwatch sw = new();
         sw.Start();
 
