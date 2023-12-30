@@ -105,7 +105,17 @@ internal class Program
                     }
 
                     if (parser.Classes.Count <= 0)
+                    {
+                        if ( fileContents.Contains( ".ignitiongenerated.h" ) )
+                        {
+                            string includeText = $"#include \"{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h\"\r\n";
+                            fileContents = fileContents.Replace( includeText, string.Empty );
+
+                            File.WriteAllText( headerFile, fileContents );
+                        }
+
                         continue;
+                    }
 
                     includes.Add(Path.GetFileName(headerFile));
 
