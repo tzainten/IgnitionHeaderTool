@@ -1,10 +1,23 @@
 ﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace IgnitionHeaderTool;
 
 internal class Program
 {
+    static string CreateMD5(string input)
+    {
+        using ( MD5 md5 = MD5.Create() )
+        {
+            byte[] inputBytes = Encoding.ASCII.GetBytes( input );
+            byte[] hashBytes = md5.ComputeHash( inputBytes );
+
+            return Convert.ToHexString( hashBytes );
+        }
+    }
+
     static void Main(string[] args)
     {
         Stopwatch sw = new();
@@ -114,6 +127,7 @@ internal class Program
                             File.WriteAllText( headerFile, fileContents );
                         }
 
+                        index++;
                         continue;
                     }
 
@@ -135,12 +149,11 @@ internal class Program
                 }
             }
 
-            if (includes.Count > 0)
             {
                 string moduleName = new DirectoryInfo(modulePath).Name;
 
                 builder = new();
-                if (!File.Exists($@"{moduleName}EventSubsystem.h"))
+                if (!File.Exists($@"{modulePath}/{moduleName}EventSubsystem.h"))
                 {
                     builder.AppendLine("// Fill out your copyright notice in the Description page of Project Settings.");
                     builder.AppendLine();
@@ -194,7 +207,25 @@ internal class Program
                 builder.AppendLine("{");
                 builder.AppendLine("}");
 
-                File.WriteAllText($@"{modulePath}/{moduleName}EventSubsystem.cpp", builder.ToString());
+                string builderString = builder.ToString();
+                string cppFilePath = $@"{modulePath}/{moduleName}EventSubsystem.cpp";
+
+                if ( File.Exists( cppFilePath ) )
+                {
+                    string builderHash = CreateMD5( builderString );
+                    string fileHash = CreateMD5( File.ReadAllText( cppFilePath ) );
+
+                    Console.WriteLine( builderHash );
+                    Console.WriteLine( fileHash );
+
+                    if ( builderHash == fileHash )
+                    {
+                        index++;
+                        continue;
+                    }
+                }
+
+                File.WriteAllText( cppFilePath, builder.ToString() );
             }
 
             index++;
