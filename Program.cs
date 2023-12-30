@@ -215,9 +215,6 @@ internal class Program
                     string builderHash = CreateMD5( builderString );
                     string fileHash = CreateMD5( File.ReadAllText( cppFilePath ) );
 
-                    Console.WriteLine( builderHash );
-                    Console.WriteLine( fileHash );
-
                     if ( builderHash == fileHash )
                     {
                         index++;
