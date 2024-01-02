@@ -69,6 +69,10 @@ internal class Program
                 {
                     builder = new();
 
+                    Console.WriteLine( $"Found {parser.Classes.Count} classes!" );
+
+                    List<string> macroStringBuilders = new();
+
                     foreach ( UClass uClass in parser.Classes )
                     {
                         if ( uClass.Line == 0 )
@@ -134,15 +138,7 @@ internal class Program
 
                         builder.AppendLine( "private:" );
                         builder.AppendLine();
-                        builder.AppendLine( $"#undef __IGNITION_CURRENT_FILE_ID__" );
-                        builder.AppendLine( $"#define __IGNITION_CURRENT_FILE_ID__ {currentFileId}" );
-
-                        string moduleName = new DirectoryInfo( modulePath ).Name;
-                        string uhtPath = $@"{intermediatePaths[ index ]}\Build\Win64\UnrealEditor\Inc\{moduleName}\UHT";
-                        if ( Directory.Exists( uhtPath ) )
-                        {
-                            File.WriteAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h", builder.ToString() );
-                        }
+                        macroStringBuilders.Add( builder.ToString() );
                     }
 
                     if ( parser.Classes.Count <= 0 )
@@ -156,6 +152,21 @@ internal class Program
                         }
 
                         continue;
+                    }
+
+                    StringBuilder ignitionGeneratedHeader = new();
+                    foreach ( var item in macroStringBuilders )
+                        ignitionGeneratedHeader.Append( item );
+
+                    ignitionGeneratedHeader.AppendLine();
+                    ignitionGeneratedHeader.AppendLine( $"#undef __IGNITION_CURRENT_FILE_ID__" );
+                    ignitionGeneratedHeader.AppendLine( $"#define __IGNITION_CURRENT_FILE_ID__ {currentFileId}" );
+
+                    string moduleName = new DirectoryInfo( modulePath ).Name;
+                    string uhtPath = $@"{intermediatePaths[ index ]}\Build\Win64\UnrealEditor\Inc\{moduleName}\UHT";
+                    if ( Directory.Exists( uhtPath ) )
+                    {
+                        File.WriteAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h", ignitionGeneratedHeader.ToString() );
                     }
 
                     includes.Add( GetPathForIncludeFile( headerFile ) );
