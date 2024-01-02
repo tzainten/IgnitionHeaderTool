@@ -8,6 +8,7 @@ namespace IgnitionHeaderTool;
 
 internal class UClass
 {
+    internal int Line = 0;
     internal string Identifier = string.Empty;
     internal List<UFunction> Methods = new();
 }

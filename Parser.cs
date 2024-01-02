@@ -52,10 +52,11 @@ internal class Parser : Tokenizer
             return true;
         else if (token.Identifier == "UCLASS") // Program exits ParseUClass early on ActorCopy.h
         {
+            int Line = 0;
             List<UFunction> uFunctions = new();
-            bool result = ParseUClass(ref uFunctions);
+            bool result = ParseUClass( ref uFunctions, ref Line );
 
-            if (uFunctions.Count > 0)
+            if ( uFunctions.Count > 0 )
             {
                 /*Console.WriteLine($"{uFunctions[0].OwningClass}:");
                 foreach (var item in uFunctions)
@@ -64,9 +65,10 @@ internal class Parser : Tokenizer
                 }*/
 
                 UClass uClass = new();
-                uClass.Identifier = uFunctions[0].OwningClass;
+                uClass.Identifier = uFunctions[ 0 ].OwningClass;
                 uClass.Methods = uFunctions;
-                Classes.Add(uClass);
+                uClass.Line = Line;
+                Classes.Add( uClass );
             }
 
             return result;
@@ -78,7 +80,7 @@ internal class Parser : Tokenizer
         }
     }
 
-    internal bool ParseUClass(ref List<UFunction> uFunctions)
+    internal bool ParseUClass(ref List<UFunction> uFunctions, ref int Line)
     {
         Token token = new();
         GetToken(ref token);
@@ -128,6 +130,11 @@ internal class Parser : Tokenizer
 
                     if (!GetToken(ref memberToken))
                         break;
+
+                    if (memberToken.Identifier == "IGNITION_BODY")
+                    {
+                        Line = memberToken.StartLine + 1;
+                    }
 
                     if (memberToken.Identifier == "UFUNCTION")
                     {
