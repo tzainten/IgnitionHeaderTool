@@ -20,17 +20,15 @@ internal class Program
 
     static string GetPathForIncludeFile( string includeFile )
     {
-        string path = @"C:\Users\tzainten\Environment\Dev\Unreal Projects\IgnitionProject\Plugins\Ignition\Source\Ignition\Public\Core\IgnitionEventSystem.h";
-
-        int publicIndex = path.LastIndexOf( "Public" );
-        int privateIndex = path.LastIndexOf( "Private" );
+        int publicIndex = includeFile.LastIndexOf( "Public" );
+        int privateIndex = includeFile.LastIndexOf( "Private" );
 
         string subPath = string.Empty;
         if ( publicIndex != -1 )
-            subPath = path.Substring( publicIndex ).Replace( "Public\\", string.Empty ).Replace( "\\", "/" );
+            subPath = includeFile.Substring( publicIndex ).Replace( "Public\\", string.Empty ).Replace( "\\", "/" );
 
         if ( privateIndex != -1 )
-            subPath = path.Substring( privateIndex ).Replace( "Private\\", string.Empty ).Replace( "\\", "/" );
+            subPath = includeFile.Substring( privateIndex ).Replace( "Private\\", string.Empty ).Replace( "\\", "/" );
 
         return subPath;
     }
@@ -48,8 +46,6 @@ internal class Program
         int index = 0;
         foreach ( var modulePath in modulePaths )
         {
-            Console.WriteLine( modulePath );
-
             if ( !Directory.Exists( $@"{modulePath}\Public" ) )
                 continue;
 
@@ -69,12 +65,12 @@ internal class Program
                 {
                     builder = new();
 
-                    Console.WriteLine( $"Found {parser.Classes.Count} classes!" );
-
                     List<string> macroStringBuilders = new();
 
                     foreach ( UClass uClass in parser.Classes )
                     {
+                        builder = new();
+
                         if ( uClass.Line == 0 )
                             throw new Exception( $"Failed to resolve the line number of IGNITION_BODY for {uClass.Identifier}" );
 
