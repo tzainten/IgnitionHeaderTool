@@ -215,14 +215,9 @@ internal class Program
                     string builderHash = CreateMD5( builder.ToString() );
                     string fileHash = CreateMD5( File.ReadAllText( $@"{modulePath}/{moduleName}EventSubsystem.h" ) );
 
-                    if ( builderHash == fileHash )
-                    {
-                        index++;
-                        continue;
-                    }
+                    if ( builderHash != fileHash )
+                        File.WriteAllText( $@"{modulePath}/{moduleName}EventSubsystem.h", builder.ToString() );
                 }
-
-                File.WriteAllText( $@"{modulePath}/{moduleName}EventSubsystem.h", builder.ToString() );
 
                 builder = new();
                 builder.AppendLine( "// Fill out your copyright notice in the Description page of Project Settings." );
