@@ -187,33 +187,42 @@ internal class Program
                 string moduleName = new DirectoryInfo( modulePath ).Name;
 
                 builder = new();
-                if ( !File.Exists( $@"{modulePath}/{moduleName}EventSubsystem.h" ) )
-                {
-                    builder.AppendLine( "// Fill out your copyright notice in the Description page of Project Settings." );
-                    builder.AppendLine();
-                    builder.AppendLine( "#pragma once" );
-                    builder.AppendLine();
-                    builder.AppendLine( "#include \"CoreMinimal.h\"" );
-                    builder.AppendLine( "#include \"Subsystems/GameInstanceSubsystem.h\"" );
-                    builder.AppendLine( $"#include \"{moduleName}EventSubsystem.generated.h\"" );
-                    builder.AppendLine();
-                    builder.AppendLine( "/**" );
-                    builder.AppendLine( "*" );
-                    builder.AppendLine( "*/" );
-                    builder.AppendLine( "UCLASS()" );
-                    builder.AppendLine( $"class {moduleName.ToUpper()}_API U{moduleName}EventSubsystem : public UGameInstanceSubsystem" );
-                    builder.AppendLine( "{" );
-                    builder.AppendLine( "\tGENERATED_BODY()" );
-                    builder.AppendLine();
-                    builder.AppendLine( "public:" );
-                    builder.AppendLine( "\t//Begin USubsystem" );
-                    builder.AppendLine( "\tvirtual void Initialize( FSubsystemCollectionBase& Collection ) override;" );
-                    builder.AppendLine( "\tvirtual void Deinitialize() override;" );
-                    builder.AppendLine( "\t// End USubsystem" );
-                    builder.AppendLine( "};" );
+                builder.AppendLine( "// Fill out your copyright notice in the Description page of Project Settings." );
+                builder.AppendLine();
+                builder.AppendLine( "#pragma once" );
+                builder.AppendLine();
+                builder.AppendLine( "#include \"CoreMinimal.h\"" );
+                builder.AppendLine( "#include \"Subsystems/EngineSubsystem.h\"" );
+                builder.AppendLine( $"#include \"{moduleName}EventSubsystem.generated.h\"" );
+                builder.AppendLine();
+                builder.AppendLine( "/**" );
+                builder.AppendLine( "*" );
+                builder.AppendLine( "*/" );
+                builder.AppendLine( "UCLASS()" );
+                builder.AppendLine( $"class {moduleName.ToUpper()}_API U{moduleName}EventSubsystem : public UEngineSubsystem" );
+                builder.AppendLine( "{" );
+                builder.AppendLine( "\tGENERATED_BODY()" );
+                builder.AppendLine();
+                builder.AppendLine( "public:" );
+                builder.AppendLine( "\t//Begin USubsystem" );
+                builder.AppendLine( "\tvirtual void Initialize( FSubsystemCollectionBase& Collection ) override;" );
+                builder.AppendLine( "\tvirtual void Deinitialize() override;" );
+                builder.AppendLine( "\t// End USubsystem" );
+                builder.AppendLine( "};" );
 
-                    File.WriteAllText( $@"{modulePath}/{moduleName}EventSubsystem.h", builder.ToString() );
+                if ( File.Exists( $@"{modulePath}/{moduleName}EventSubsystem.h" ) )
+                {
+                    string builderHash = CreateMD5( builder.ToString() );
+                    string fileHash = CreateMD5( File.ReadAllText( $@"{modulePath}/{moduleName}EventSubsystem.h" ) );
+
+                    if ( builderHash == fileHash )
+                    {
+                        index++;
+                        continue;
+                    }
                 }
+
+                File.WriteAllText( $@"{modulePath}/{moduleName}EventSubsystem.h", builder.ToString() );
 
                 builder = new();
                 builder.AppendLine( "// Fill out your copyright notice in the Description page of Project Settings." );
