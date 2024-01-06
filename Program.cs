@@ -54,6 +54,7 @@ internal class Program
 
             StringBuilder builder = new();
 
+            bool moduleHasEvents = false;
             foreach ( var headerFile in Directory.GetFiles( $@"{modulePath}\Public", "*.h", SearchOption.AllDirectories ) )
             {
                 string fileContents = File.ReadAllText( headerFile );
@@ -63,6 +64,7 @@ internal class Program
                 Parser parser = new();
                 if ( parser.Parse( fileContents ) )
                 {
+                    moduleHasEvents = parser.Classes.Count > 0;
                     builder = new();
 
                     List<string> macroStringBuilders = new();
@@ -182,6 +184,8 @@ internal class Program
                     return;
                 }
             }
+
+            if ( !moduleHasEvents ) continue;
 
             {
                 string moduleName = new DirectoryInfo( modulePath ).Name;
