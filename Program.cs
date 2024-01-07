@@ -64,7 +64,9 @@ internal class Program
                 Parser parser = new();
                 if ( parser.Parse( fileContents ) )
                 {
-                    moduleHasEvents = parser.Classes.Count > 0;
+                    if ( !moduleHasEvents && parser.Classes.Count > 0 )
+                        moduleHasEvents = true;
+
                     builder = new();
 
                     List<string> macroStringBuilders = new();
@@ -185,7 +187,11 @@ internal class Program
                 }
             }
 
-            if ( !moduleHasEvents ) continue;
+            if ( !moduleHasEvents )
+            {
+                Console.WriteLine( $"Module {modulePath} has no events!" );
+                continue;
+            }
 
             {
                 string moduleName = new DirectoryInfo( modulePath ).Name;
