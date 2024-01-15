@@ -43,6 +43,7 @@ internal class Program
         List<string> intermediatePaths = FileSystem.GetAllIntermediateFolders( modulePaths );
 
         int index = 0;
+        bool wasAnyFileWrittenTo = false;
         foreach ( var modulePath in modulePaths )
         {
             if ( !Directory.Exists( $@"{modulePath}\Public" ) )
@@ -148,6 +149,9 @@ internal class Program
                             fileContents = fileContents.Replace( includeText, string.Empty );
 
                             File.WriteAllText( headerFile, fileContents );
+
+                            if ( !wasAnyFileWrittenTo )
+                                wasAnyFileWrittenTo = true;
                         }
 
                         continue;
@@ -177,6 +181,8 @@ internal class Program
                             }
                         }
                         File.WriteAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h", ignitionGeneratedHeader.ToString() );
+                        if ( !wasAnyFileWrittenTo )
+                            wasAnyFileWrittenTo = true;
                     }
 
                     includes.Add( GetPathForIncludeFile( headerFile ) );
@@ -188,6 +194,8 @@ internal class Program
                         fileContents = fileContents.Replace( includeText, newIncludeText );
 
                         File.WriteAllText( headerFile, fileContents );
+                        if ( !wasAnyFileWrittenTo )
+                            wasAnyFileWrittenTo = true;
                     }
                 }
                 else
@@ -236,7 +244,11 @@ internal class Program
                     string fileHash = CreateMD5( File.ReadAllText( $@"{modulePath}/{moduleName}EventSubsystem.h" ) );
 
                     if ( builderHash != fileHash )
+                    {
                         File.WriteAllText( $@"{modulePath}/{moduleName}EventSubsystem.h", builder.ToString() );
+                        if ( !wasAnyFileWrittenTo )
+                            wasAnyFileWrittenTo = true;
+                    }
                 }
 
                 builder = new();
@@ -281,12 +293,16 @@ internal class Program
                 }
 
                 File.WriteAllText( cppFilePath, builder.ToString() );
+                if ( !wasAnyFileWrittenTo )
+                    wasAnyFileWrittenTo = true;
             }
 
             index++;
         }
 
         sw.Stop();
-        Console.WriteLine( $"Generated reflection code for Ignition in {sw.Elapsed.TotalSeconds} seconds" );
+
+        if ( wasAnyFileWrittenTo )
+            Console.WriteLine( $"Generated reflection code for Ignition in {sw.Elapsed.TotalSeconds} seconds" );
     }
 }
