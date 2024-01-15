@@ -12,12 +12,12 @@ internal class Parser : Tokenizer
     internal List<string> Includes = new();
     internal List<UClass> Classes = new();
 
-    internal bool Parse(string input)
+    internal bool Parse( string input )
     {
-        Reset(input);
+        Reset( input );
         Includes.Clear();
 
-        while (ParseStatement()) { }
+        while ( ParseStatement() ) { }
 
         return true;
     }
@@ -26,17 +26,17 @@ internal class Parser : Tokenizer
     {
         Token token = new();
 
-        if (!GetToken(ref token))
+        if ( !GetToken( ref token ) )
             return false;
 
-        if (token.Identifier.EndsWith("_API"))
+        if ( token.Identifier.EndsWith( "_API" ) )
         {
             token = new();
-            if (!GetToken(ref token))
+            if ( !GetToken( ref token ) )
                 return false;
         }
 
-        if (!ParseDeclaration(token))
+        if ( !ParseDeclaration( token ) )
             return false;
 
         //Console.WriteLine($"Identifier: {token.Identifier}, StartLine: {token.StartLine + 1}");
@@ -44,17 +44,27 @@ internal class Parser : Tokenizer
         return true;
     }
 
-    internal bool ParseDeclaration(Token token)
+    internal bool ParseDeclaration( Token token )
     {
-        if (token.Identifier == "#")
+        if ( token.Identifier == "#" )
             return ParseDirective();
-        if (token.Identifier.EndsWith("_API"))
+        if ( token.Identifier.EndsWith( "_API" ) )
             return true;
-        else if (token.Identifier == "UCLASS") // Program exits ParseUClass early on ActorCopy.h
+        else if ( token.Identifier == "UCLASS" )
         {
             int Line = 0;
+            string ClassIdentifier = string.Empty;
+
             List<UFunction> uFunctions = new();
-            bool result = ParseUClass( ref uFunctions, ref Line );
+            bool result = ParseUClass( ref uFunctions, ref Line, ref ClassIdentifier );
+
+            if ( ClassIdentifier != string.Empty && uFunctions.Count <= 0 )
+            {
+                UClass uClass = new();
+                uClass.Identifier = ClassIdentifier;
+                uClass.Line = Line;
+                Classes.Add( uClass );
+            }
 
             if ( uFunctions.Count > 0 )
             {
@@ -80,27 +90,27 @@ internal class Parser : Tokenizer
         }
     }
 
-    internal bool ParseUClass(ref List<UFunction> uFunctions, ref int Line)
+    internal bool ParseUClass( ref List<UFunction> uFunctions, ref int Line, ref string ClassIdentifier )
     {
         Token token = new();
-        GetToken(ref token);
+        GetToken( ref token );
 
-        if (token.Identifier == "(")
+        if ( token.Identifier == "(" )
         {
             Token closingToken = new();
 
             int scopeDepth = 1;
-            while (GetToken(ref closingToken))
+            while ( GetToken( ref closingToken ) )
             {
-                if (closingToken.Identifier == "(")
+                if ( closingToken.Identifier == "(" )
                 {
                     scopeDepth++;
                 }
 
-                if (closingToken.Identifier == ")")
+                if ( closingToken.Identifier == ")" )
                 {
                     scopeDepth--;
-                    if (scopeDepth == 0)
+                    if ( scopeDepth == 0 )
                     {
                         break;
                     }
@@ -110,63 +120,64 @@ internal class Parser : Tokenizer
             }
 
             Token classToken = new();
-            GetToken(ref classToken);
+            GetToken( ref classToken );
 
-            if (classToken.Identifier == "class")
+            if ( classToken.Identifier == "class" )
             {
                 Token classIdentifier = new();
-                GetToken(ref classIdentifier);
+                GetToken( ref classIdentifier );
 
-                if (classIdentifier.Identifier.EndsWith("_API"))
+                if ( classIdentifier.Identifier.EndsWith( "_API" ) )
                 {
                     classIdentifier = new();
-                    GetToken(ref classIdentifier);
+                    GetToken( ref classIdentifier );
                 }
 
                 int braceScope = 0;
-                while (true)
+                while ( true )
                 {
                     Token memberToken = new();
 
-                    if (!GetToken(ref memberToken))
+                    if ( !GetToken( ref memberToken ) )
                         break;
 
-                    if (memberToken.Identifier == "IGNITION_BODY")
+                    if ( memberToken.Identifier == "IGNITION_BODY" )
                     {
                         Line = memberToken.StartLine + 1;
+                        ClassIdentifier = classIdentifier.Identifier;
                     }
 
-                    if (memberToken.Identifier == "UFUNCTION")
+                    if ( memberToken.Identifier == "UFUNCTION" )
                     {
                         //Console.WriteLine($"Parsing UFUNCTION @ line {memberToken.StartLine + 1}");
 
                         UFunction uFunction = new();
                         uFunction.OwningClass = classIdentifier.Identifier;
 
-                        if (ParseUFunction(ref uFunction))
-                            uFunctions.Add(uFunction);
+                        if ( ParseUFunction( ref uFunction ) )
+                            uFunctions.Add( uFunction );
                     }
 
-                    if (memberToken.Identifier == "UPROPERTY")
+                    if ( memberToken.Identifier == "UPROPERTY" )
                     {
                         ParseUProperty();
                     }
 
-                    if (memberToken.Identifier == "{")
+                    if ( memberToken.Identifier == "{" )
                         braceScope++;
 
-                    if (memberToken.Identifier == "}")
+                    if ( memberToken.Identifier == "}" )
                     {
                         braceScope--;
 
                         Token semiColonToken = new();
-                        if (!GetToken(ref semiColonToken))
+                        if ( !GetToken( ref semiColonToken ) )
                             break;
 
-                        if (semiColonToken.Identifier == ";")
+                        if ( semiColonToken.Identifier == ";" )
                         {
                             //Console.WriteLine($"BREAKING @ line {semiColonToken.StartLine + 1}");
-                            if (braceScope == 0)
+                            if ( braceScope == 0 )
                                 break;
                         }
                     }
@@ -183,24 +194,24 @@ internal class Parser : Tokenizer
     {
         Token token = new();
 
-        while (GetToken(ref token))
+        while ( GetToken( ref token ) )
         {
-            if (token.Identifier == "(")
+            if ( token.Identifier == "(" )
             {
                 Token closingToken = new();
 
                 int scopeDepth = 1;
-                while (GetToken(ref closingToken))
+                while ( GetToken( ref closingToken ) )
                 {
-                    if (closingToken.Identifier == "(")
+                    if ( closingToken.Identifier == "(" )
                     {
                         scopeDepth++;
                     }
 
-                    if (closingToken.Identifier == ")")
+                    if ( closingToken.Identifier == ")" )
                     {
                         scopeDepth--;
-                        if (scopeDepth == 0)
+                        if ( scopeDepth == 0 )
                         {
                             break;
                         }
@@ -210,75 +221,75 @@ internal class Parser : Tokenizer
                 }
 
                 Token semiColonToken = new();
-                GetToken(ref semiColonToken);
+                GetToken( ref semiColonToken );
 
-                if (semiColonToken.Identifier != ";")
+                if ( semiColonToken.Identifier != ";" )
                 {
-                    UngetToken(ref semiColonToken);
+                    UngetToken( ref semiColonToken );
                 }
             }
 
-            if (token.Identifier == ";")
+            if ( token.Identifier == ";" )
                 break;
 
             token = new();
         }
     }
 
-    internal bool ParseUFunction(ref UFunction uFunction)
+    internal bool ParseUFunction( ref UFunction uFunction )
     {
         Token token = new();
-        GetToken(ref token);
+        GetToken( ref token );
 
-        if (token.Identifier == "(")
+        if ( token.Identifier == "(" )
         {
             Token closingToken = new();
 
             bool hasEventMeta = false;
             int scopeDepth = 1;
-            while (GetToken(ref closingToken))
+            while ( GetToken( ref closingToken ) )
             {
-                if (closingToken.Identifier == "(")
+                if ( closingToken.Identifier == "(" )
                 {
                     scopeDepth++;
                 }
 
-                if (closingToken.Identifier == ")")
+                if ( closingToken.Identifier == ")" )
                 {
                     scopeDepth--;
-                    if (scopeDepth == 0)
+                    if ( scopeDepth == 0 )
                     {
                         //Console.WriteLine($"CLOSING @ LINE: {closingToken.StartLine + 1}");
                         break;
                     }
                 }
 
-                if (closingToken.Identifier.ToLower() == "event")
+                if ( closingToken.Identifier.ToLower() == "event" )
                 {
                     hasEventMeta = true;
 
                     Token equalToken = new();
-                    if (!GetToken(ref equalToken))
+                    if ( !GetToken( ref equalToken ) )
                         return false;
 
-                    if (equalToken.Identifier != "=")
+                    if ( equalToken.Identifier != "=" )
                         return false;
 
                     Token openQuoteToken = new();
-                    if (!GetToken(ref openQuoteToken))
+                    if ( !GetToken( ref openQuoteToken ) )
                         return false;
 
-                    if (openQuoteToken.Identifier != "\"")
+                    if ( openQuoteToken.Identifier != "\"" )
                         return false;
 
                     Token eventNameToken = new();
-                    while (true)
+                    while ( true )
                     {
                         Token nextToken = new();
-                        if (!GetToken(ref nextToken))
+                        if ( !GetToken( ref nextToken ) )
                             return false;
 
-                        if (nextToken.Identifier == "\"")
+                        if ( nextToken.Identifier == "\"" )
                             break;
 
                         eventNameToken.Identifier += nextToken.Identifier;
@@ -290,84 +301,84 @@ internal class Parser : Tokenizer
                 closingToken = new();
             }
 
-            if (!hasEventMeta)
+            if ( !hasEventMeta )
             {
                 bool shouldLoop = true;
-                while (shouldLoop)
+                while ( shouldLoop )
                 {
                     Token _token = new();
-                    if (!GetToken(ref _token))
+                    if ( !GetToken( ref _token ) )
                         break;
 
-                    if (_token.Identifier.EndsWith("_API"))
+                    if ( _token.Identifier.EndsWith( "_API" ) )
                     {
                         _token = new();
-                        if (!GetToken(ref _token))
+                        if ( !GetToken( ref _token ) )
                             break;
                     }
 
-                    if (_token.Identifier == "(")
+                    if ( _token.Identifier == "(" )
                     {
-                        while (true)
+                        while ( true )
                         {
                             Token closingParanthesesToken = new();
-                            if (!GetToken(ref closingParanthesesToken))
+                            if ( !GetToken( ref closingParanthesesToken ) )
                             {
                                 shouldLoop = false;
                                 break;
                             }
 
-                            if (closingParanthesesToken.Identifier == ")")
+                            if ( closingParanthesesToken.Identifier == ")" )
                             {
                                 //Console.WriteLine($"close @ {closingParanthesesToken.StartLine + 1}");
 
                                 Token semiColonToken = new();
-                                if (!GetToken(ref semiColonToken))
+                                if ( !GetToken( ref semiColonToken ) )
                                 {
                                     shouldLoop = false;
                                     break;
                                 }
 
-                                if (semiColonToken.Identifier == ";")
+                                if ( semiColonToken.Identifier == ";" )
                                 {
                                     shouldLoop = false;
                                     break;
                                 }
 
-                                if (semiColonToken.Identifier == "const")
+                                if ( semiColonToken.Identifier == "const" )
                                 {
                                     semiColonToken = new();
-                                    if (!GetToken(ref semiColonToken))
+                                    if ( !GetToken( ref semiColonToken ) )
                                     {
                                         shouldLoop = false;
                                         break;
                                     }
 
-                                    if (semiColonToken.Identifier == ";")
+                                    if ( semiColonToken.Identifier == ";" )
                                     {
                                         shouldLoop = false;
                                         break;
                                     }
 
-                                    if (semiColonToken.Identifier == "{")
+                                    if ( semiColonToken.Identifier == "{" )
                                     {
                                         int braceScopeDepth = 1;
-                                        while (true)
+                                        while ( true )
                                         {
                                             Token closeBraceToken = new();
-                                            if (!GetToken(ref closeBraceToken))
+                                            if ( !GetToken( ref closeBraceToken ) )
                                             {
                                                 shouldLoop = false;
                                                 break;
                                             }
 
-                                            if (closeBraceToken.Identifier == "{")
+                                            if ( closeBraceToken.Identifier == "{" )
                                                 braceScopeDepth++;
 
-                                            if (closeBraceToken.Identifier == "}")
+                                            if ( closeBraceToken.Identifier == "}" )
                                             {
                                                 braceScopeDepth--;
-                                                if (braceScopeDepth == 0)
+                                                if ( braceScopeDepth == 0 )
                                                 {
                                                     shouldLoop = false;
                                                     break;
@@ -378,7 +389,7 @@ internal class Parser : Tokenizer
                                 }
                             }
                         }
-                        
+
                     }
                 }
 
@@ -389,85 +400,85 @@ internal class Parser : Tokenizer
             }
 
             Token returnTypeToken = new();
-            GetToken(ref returnTypeToken);
+            GetToken( ref returnTypeToken );
 
-            if (returnTypeToken.Identifier.EndsWith("_API"))
+            if ( returnTypeToken.Identifier.EndsWith( "_API" ) )
             {
                 returnTypeToken = new();
-                GetToken(ref returnTypeToken);
+                GetToken( ref returnTypeToken );
             }
 
-            if (returnTypeToken.Identifier == "virtual")
+            if ( returnTypeToken.Identifier == "virtual" )
             {
                 returnTypeToken = new();
-                GetToken(ref returnTypeToken);
+                GetToken( ref returnTypeToken );
             }
 
-            if (returnTypeToken.Identifier != "void")
+            if ( returnTypeToken.Identifier != "void" )
             {
-                Console.WriteLine($"ERROR: UFUNCTION @ Line: {returnTypeToken.StartLine + 1} is an event function and must have a return type of void!");
+                Console.WriteLine( $"ERROR: UFUNCTION @ Line: {returnTypeToken.StartLine + 1} is an event function and must have a return type of void!" );
                 return false;
             }
 
             Token methodNameToken = new();
-            GetToken(ref methodNameToken);
+            GetToken( ref methodNameToken );
 
             uFunction.MethodName = methodNameToken.Identifier;
 
             scopeDepth = 0;
-            while (true)
+            while ( true )
             {
                 Token semiColonToken = new();
-                if (!GetToken(ref semiColonToken))
+                if ( !GetToken( ref semiColonToken ) )
                     break;
 
                 // Parse arguments
-                if (semiColonToken.Identifier == "(")
+                if ( semiColonToken.Identifier == "(" )
                 {
                     int argsScopeDepth = 0;
 
                     UArg Arg = new();
-                    while (true)
+                    while ( true )
                     {
                         Token argToken = new();
-                        if (!GetToken(ref argToken))
+                        if ( !GetToken( ref argToken ) )
                             break;
 
-                        if (argToken.Identifier == ")")
+                        if ( argToken.Identifier == ")" )
                         {
                             argsScopeDepth--;
-                            if (scopeDepth == 0)
+                            if ( scopeDepth == 0 )
                             {
-                                if (Arg.Type.Length > 0)
+                                if ( Arg.Type.Length > 0 )
                                 {
-                                    string[] argArray = Arg.Type.Split(' ');
+                                    string[] argArray = Arg.Type.Split( ' ' );
                                     Arg.Type = string.Empty;
-                                    for (int i = 0; i < argArray.Length - 1; i++)
+                                    for ( int i = 0; i < argArray.Length - 1; i++ )
                                     {
-                                        argArray[i] = argArray[i].Trim();
-                                        Arg.Type += argArray[i];
+                                        argArray[ i ] = argArray[ i ].Trim();
+                                        Arg.Type += argArray[ i ];
                                     }
 
-                                    uFunction.Args.Add(Arg);
+                                    uFunction.Args.Add( Arg );
                                 }
 
                                 break;
                             }
                         }
 
-                        if (argToken.Identifier == ",")
+                        if ( argToken.Identifier == "," )
                         {
-                            if (Arg.Type.Length > 0)
+                            if ( Arg.Type.Length > 0 )
                             {
-                                string[] argArray = Arg.Type.Split(' ');
+                                string[] argArray = Arg.Type.Split( ' ' );
                                 Arg.Type = string.Empty;
-                                for (int i = 0; i < argArray.Length - 1; i++)
+                                for ( int i = 0; i < argArray.Length - 1; i++ )
                                 {
-                                    argArray[i] = argArray[i].Trim();
-                                    Arg.Type += argArray[i];
+                                    argArray[ i ] = argArray[ i ].Trim();
+                                    Arg.Type += argArray[ i ];
                                 }
 
-                                uFunction.Args.Add(Arg);
+                                uFunction.Args.Add( Arg );
                             }
                             Arg = new();
                             continue;
@@ -477,17 +488,17 @@ internal class Parser : Tokenizer
                     }
                 }
 
-                if (semiColonToken.Identifier == "{")
+                if ( semiColonToken.Identifier == "{" )
                     scopeDepth++;
 
-                if (semiColonToken.Identifier == "}")
+                if ( semiColonToken.Identifier == "}" )
                 {
                     scopeDepth--;
-                    if (scopeDepth == 0)
+                    if ( scopeDepth == 0 )
                         break;
                 }
 
-                if (semiColonToken.Identifier == ";" && scopeDepth == 0)
+                if ( semiColonToken.Identifier == ";" && scopeDepth == 0 )
                     break;
             }
 
@@ -500,18 +511,18 @@ internal class Parser : Tokenizer
     internal bool ParseDirective()
     {
         Token token = new();
-        GetToken(ref token);
+        GetToken( ref token );
 
         Token nextToken = new();
-        if (token.Identifier == "include")
+        if ( token.Identifier == "include" )
             return ParseInclude();
-        else if (token.Identifier == "pragma")
-            return ParsePragma(token.StartLine);
-        else if (token.Identifier == "define")
+        else if ( token.Identifier == "pragma" )
+            return ParsePragma( token.StartLine );
+        else if ( token.Identifier == "define" )
             return ParseDefine();
-        else if (token.Identifier == "ifdef" || token.Identifier == "ifndef" || token.Identifier == "if")
+        else if ( token.Identifier == "ifdef" || token.Identifier == "ifndef" || token.Identifier == "if" )
             return ParseIf();
-        else if (token.Identifier == "line")
+        else if ( token.Identifier == "line" )
             return ParseLine();
 
         return true;
@@ -520,15 +531,15 @@ internal class Parser : Tokenizer
     internal bool ParseLine()
     {
         Token token = new();
-        GetToken(ref token);
+        GetToken( ref token );
 
         int line = token.StartLine;
 
-        while (GetToken(ref token))
+        while ( GetToken( ref token ) )
         {
-            if (token.StartLine > line)
+            if ( token.StartLine > line )
             {
-                UngetToken(ref token);
+                UngetToken( ref token );
                 break;
             }
 
@@ -545,17 +556,17 @@ internal class Parser : Tokenizer
         Token token = new();
         Token previousToken = new();
 
-        while (GetToken(ref token))
+        while ( GetToken( ref token ) )
         {
-            if (previousToken.Identifier == "#")
+            if ( previousToken.Identifier == "#" )
             {
-                if (token.Identifier == "ifdef" || token.Identifier == "ifndef" || token.Identifier == "if")
+                if ( token.Identifier == "ifdef" || token.Identifier == "ifndef" || token.Identifier == "if" )
                     scopeDepth++;
 
-                if (token.Identifier == "endif")
+                if ( token.Identifier == "endif" )
                 {
                     scopeDepth--;
-                    if (scopeDepth == 0)
+                    if ( scopeDepth == 0 )
                         break;
                 }
             }
@@ -567,16 +578,16 @@ internal class Parser : Tokenizer
         return true;
     }
 
-    internal bool ParsePragma(int startingLine)
+    internal bool ParsePragma( int startingLine )
     {
         Token token = new();
-        while (true)
+        while ( true )
         {
-            GetToken(ref token);
+            GetToken( ref token );
 
-            if (token.StartLine > startingLine)
+            if ( token.StartLine > startingLine )
             {
-                UngetToken(ref token);
+                UngetToken( ref token );
                 break;
             }
 
@@ -589,45 +600,45 @@ internal class Parser : Tokenizer
     internal bool ParseInclude()
     {
         Token openToken = new();
-        GetToken(ref openToken);
+        GetToken( ref openToken );
 
         string include = string.Empty;
 
-        if (openToken.Identifier == "\"")
+        if ( openToken.Identifier == "\"" )
         {
 
             Token nextToken;
-            while (true)
+            while ( true )
             {
                 nextToken = new();
-                GetToken(ref nextToken);
+                GetToken( ref nextToken );
 
-                if (nextToken.Identifier == "\"")
+                if ( nextToken.Identifier == "\"" )
                     break;
 
                 include += nextToken.Identifier;
             }
 
-            Includes.Add(include);
+            Includes.Add( include );
 
             return true;
         }
 
-        if (openToken.Identifier == "<")
+        if ( openToken.Identifier == "<" )
         {
             Token nextToken = new();
-            while (true)
+            while ( true )
             {
                 nextToken = new();
-                GetToken(ref nextToken);
+                GetToken( ref nextToken );
 
-                if (nextToken.Identifier == ">")
+                if ( nextToken.Identifier == ">" )
                     break;
 
                 include += nextToken.Identifier;
             }
 
-            Includes.Add(include);
+            Includes.Add( include );
 
             return true;
         }
@@ -638,7 +649,7 @@ internal class Parser : Tokenizer
     internal bool ParseDefine()
     {
         Token defineIdentifier = new();
-        if (!GetToken(ref defineIdentifier))
+        if ( !GetToken( ref defineIdentifier ) )
             return false;
 
         int line = defineIdentifier.StartLine;
@@ -646,17 +657,17 @@ internal class Parser : Tokenizer
         Token token = new();
         Token previousToken = new();
 
-        while (GetToken(ref token))
+        while ( GetToken( ref token ) )
         {
-            if (token.StartLine > line)
+            if ( token.StartLine > line )
             {
-                if (previousToken.Identifier == "\\")
+                if ( previousToken.Identifier == "\\" )
                 {
                     line++;
                 }
                 else
                 {
-                    UngetToken(ref token);
+                    UngetToken( ref token );
                     break;
                 }
             }
@@ -673,28 +684,28 @@ internal class Parser : Tokenizer
         Token token = new();
 
         int scopeDepth = 0;
-        while (GetToken(ref token))
+        while ( GetToken( ref token ) )
         {
-            if (token.Identifier == ";" && scopeDepth == 0)
+            if ( token.Identifier == ";" && scopeDepth == 0 )
                 break;
 
-            if (token.Identifier == "{")
+            if ( token.Identifier == "{" )
                 scopeDepth++;
 
-            if (token.Identifier == "}")
+            if ( token.Identifier == "}" )
             {
                 scopeDepth--;
 
                 Token semiColonToken = new();
-                if (!GetToken(ref semiColonToken))
+                if ( !GetToken( ref semiColonToken ) )
                     break;
 
-                if (semiColonToken.Identifier == ";")
+                if ( semiColonToken.Identifier == ";" )
                     break;
                 else
-                    UngetToken(ref semiColonToken);
+                    UngetToken( ref semiColonToken );
 
-                if (scopeDepth == 0)
+                if ( scopeDepth == 0 )
                     break;
             }
 

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace IgnitionHeaderTool;
 
@@ -40,7 +39,11 @@ internal class Program
 
         FileSystem.FindUProjectPath();
 
-        List<string> modulePaths = FileSystem.GetAllModules();
+        //List<string> modulePaths = FileSystem.GetAllModules();
+        List<string> modulePaths = new()
+        {
+            @"C:\Users\tzainten\Environment\Dev\Unreal Projects\IgnitionProject\Plugins\Ignition\Source\Ignition"
+        };
         List<string> intermediatePaths = FileSystem.GetAllIntermediateFolders( modulePaths );
 
         int index = 0;
