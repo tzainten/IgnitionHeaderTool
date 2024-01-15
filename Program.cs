@@ -78,26 +78,29 @@ internal class Program
                         if ( uClass.Line == 0 )
                             throw new Exception( $"Failed to resolve the line number of IGNITION_BODY for {uClass.Identifier}" );
 
-                        builder.AppendLine( $"\t{{ // START: {uClass.Identifier}" );
-                        builder.AppendLine( "\t\tTArray<FIgnitionMethodInfo> __MethodList;" );
-
-                        foreach ( UFunction uFunction in uClass.Methods )
+                        if ( uClass.Methods.Count > 0 )
                         {
-                            builder.AppendLine( "\t\t{" );
-                            builder.AppendLine( "\t\t\tFIgnitionMethodInfo __MethodInfo;" );
-                            builder.AppendLine( $"\t\t\t__MethodInfo.EventName = FName( TEXT( \"{uFunction.EventName}\" ) );" );
-                            builder.AppendLine( $"\t\t\t__MethodInfo.ParamCount = {uFunction.ParamCount};" );
-                            builder.AppendLine( $"\t\t\t__MethodInfo.Function = &{uClass.Identifier}::__IHT_{uFunction.MethodName};" );
-                            builder.AppendLine( "\t\t\t__MethodList.Add( __MethodInfo );" );
-                            builder.AppendLine( "\t\t}" );
+                            builder.AppendLine( $"\t{{ // START: {uClass.Identifier}" );
+                            builder.AppendLine( "\t\tTArray<FIgnitionMethodInfo> __MethodList;" );
+
+                            foreach ( UFunction uFunction in uClass.Methods )
+                            {
+                                builder.AppendLine( "\t\t{" );
+                                builder.AppendLine( "\t\t\tFIgnitionMethodInfo __MethodInfo;" );
+                                builder.AppendLine( $"\t\t\t__MethodInfo.EventName = FName( TEXT( \"{uFunction.EventName}\" ) );" );
+                                builder.AppendLine( $"\t\t\t__MethodInfo.ParamCount = {uFunction.ParamCount};" );
+                                builder.AppendLine( $"\t\t\t__MethodInfo.Function = &{uClass.Identifier}::__IHT_{uFunction.MethodName};" );
+                                builder.AppendLine( "\t\t\t__MethodList.Add( __MethodInfo );" );
+                                builder.AppendLine( "\t\t}" );
+                            }
+
+                            builder.AppendLine();
+                            builder.AppendLine( $"\t\tFIgnitionEventSystem::AddClassMethods( {uClass.Identifier}::StaticClass(), __MethodList );" );
+
+                            builder.AppendLine( $"\t}} // END: {uClass.Identifier}" );
+
+                            cppBody.Add( builder.ToString() );
                         }
-
-                        builder.AppendLine();
-                        builder.AppendLine( $"\t\tFIgnitionEventSystem::AddClassMethods( {uClass.Identifier}::StaticClass(), __MethodList );" );
-
-                        builder.AppendLine( $"\t}} // END: {uClass.Identifier}" );
-
-                        cppBody.Add( builder.ToString() );
 
                         builder = new();
 
