@@ -145,6 +145,15 @@ internal class Parser : Tokenizer
                     {
                         Line = memberToken.StartLine + 1;
                         ClassIdentifier = classIdentifier.Identifier;
+
+                        bool ContainsGeneratedHeaderFile = false;
+                        foreach ( var item in Includes )
+                        {
+                            if ( item.Contains( "ignitiongenerated.h" ) )
+                                ContainsGeneratedHeaderFile = true;
+                        }
+                        if ( !ContainsGeneratedHeaderFile )
+                            Line++;
                     }
 
                     if ( memberToken.Identifier == "UFUNCTION" )

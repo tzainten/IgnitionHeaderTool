@@ -39,11 +39,7 @@ internal class Program
 
         FileSystem.FindUProjectPath();
 
-        //List<string> modulePaths = FileSystem.GetAllModules();
-        List<string> modulePaths = new()
-        {
-            @"C:\Users\tzainten\Environment\Dev\Unreal Projects\IgnitionProject\Plugins\Ignition\Source\Ignition"
-        };
+        List<string> modulePaths = FileSystem.GetAllModules();
         List<string> intermediatePaths = FileSystem.GetAllIntermediateFolders( modulePaths );
 
         int index = 0;
