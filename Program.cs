@@ -165,6 +165,17 @@ internal class Program
                     string uhtPath = $@"{intermediatePaths[ index ]}\Build\Win64\UnrealEditor\Inc\{moduleName}\UHT";
                     if ( Directory.Exists( uhtPath ) )
                     {
+                        if ( File.Exists( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h" ) )
+                        {
+                            string builderHash = CreateMD5( ignitionGeneratedHeader.ToString() );
+                            string fileHash = CreateMD5( File.ReadAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h" ) );
+
+                            if ( builderHash == fileHash )
+                            {
+                                index++;
+                                continue;
+                            }
+                        }
                         File.WriteAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h", ignitionGeneratedHeader.ToString() );
                     }
 
