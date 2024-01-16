@@ -178,11 +178,10 @@ internal class Program
                             string fileHash = CreateMD5( File.ReadAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h" ) );
 
                             if ( builderHash == fileHash )
-                            {
-                                index++;
                                 continue;
-                            }
                         }
+
+                        Console.WriteLine( $@"Writing to: {uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h" );
                         File.WriteAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h", ignitionGeneratedHeader.ToString() );
                         if ( !wasAnyFileWrittenTo )
                             wasAnyFileWrittenTo = true;
