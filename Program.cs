@@ -71,6 +71,9 @@ internal class Program
 
                     List<string> macroStringBuilders = new();
 
+                    bool fileContainsMinimalInclude = fileContents.Contains( "IgnitionMinimal.h" );
+                    bool fileContainsGeneratedInclude = fileContents.Contains( ".ignitiongenerated.h" );
+
                     foreach ( UClass uClass in parser.Classes )
                     {
                         builder = new();
@@ -104,7 +107,13 @@ internal class Program
 
                         builder = new();
 
-                        string macro = currentFileId + $"_{uClass.Line}";
+                        int classLine = uClass.Line;
+
+                        if ( !fileContainsMinimalInclude )
+                            classLine++;
+
+                        string macro = currentFileId + $"_{classLine}";
+
                         builder.AppendLine( $"#define {macro} \\" );
                         builder.AppendLine( "public: \\" );
 
@@ -178,16 +187,28 @@ internal class Program
                             string fileHash = CreateMD5( File.ReadAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h" ) );
 
                             if ( builderHash == fileHash )
-                                continue;
+                                goto DontWriteToUHTFile;
                         }
 
-                        Console.WriteLine( $@"Writing to: {uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h" );
                         File.WriteAllText( $@"{uhtPath}\{Path.GetFileNameWithoutExtension( headerFile )}.ignitiongenerated.h", ignitionGeneratedHeader.ToString() );
                         if ( !wasAnyFileWrittenTo )
                             wasAnyFileWrittenTo = true;
                     }
 
+                    DontWriteToUHTFile:
+
                     includes.Add( GetPathForIncludeFile( headerFile ) );
+
+                    if ( !fileContents.Contains( "IgnitionMinimal.h" ) )
+                    {
+                        string includeText = $"#include \"CoreMinimal.h\"";
+                        string newIncludeText = includeText + $"\r\n#include \"IgnitionMinimal.h\"";
+                        fileContents = fileContents.Replace( includeText, newIncludeText );
+
+                        File.WriteAllText( headerFile, fileContents );
+                        if ( !wasAnyFileWrittenTo )
+                            wasAnyFileWrittenTo = true;
+                    }
 
                     if ( !fileContents.Contains( ".ignitiongenerated.h" ) )
                     {
@@ -208,10 +229,7 @@ internal class Program
             }
 
             if ( !moduleHasEvents )
-            {
-                Console.WriteLine( $"Module {modulePath} has no events!" );
                 continue;
-            }
 
             {
                 string moduleName = new DirectoryInfo( modulePath ).Name;
