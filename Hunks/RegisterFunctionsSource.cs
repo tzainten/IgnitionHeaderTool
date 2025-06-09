@@ -1,0 +1,131 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace IgnitionHeaderTool.Hunks;
+
+internal class RegisterFunctionsSource : ExportHunk
+{
+    public RegisterFunctionsSource(FileInfo fileInfo)
+        : base(fileInfo)
+    {
+        Beacons.Add("FNativeFunctionRegistrar::RegisterFunctions(Class, Funcs, UE_ARRAY_COUNT(Funcs));");
+        Beacons.Add("}");
+        if (fileInfo.Class == null)
+        {
+            throw new NotImplementedException();
+        }
+        DefaultInterpolatedStringHandler val = new();
+        val.AppendLiteral("struct Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics\r\n\t{\r\n\t\tstruct ");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventConstructEventParams_Parms\r\n\t\t{\r\n\t\t\tFName InEventName;\r\n\t\t};\r\n\t\tstatic const UECodeGen_Private::FNamePropertyParams NewProp_InEventName;\r\n\t\tstatic const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];\r\n#if WITH_METADATA\r\n\t\tstatic const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];\r\n#endif\r\n\t\tstatic const UECodeGen_Private::FFunctionParams FuncParams;\r\n\t};\r\n\tconst UECodeGen_Private::FNamePropertyParams Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::NewProp_InEventName = { \"InEventName\", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Name, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventConstructEventParams_Parms, InEventName), METADATA_PARAMS(0, nullptr) };\r\n\tconst UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::PropPointers[] = {\r\n\t\t(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::NewProp_InEventName,\r\n\t};\r\n#if WITH_METADATA\r\n\tconst UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::Function_MetaDataParams[] = {\r\n\t\t{ \"ModuleRelativePath\", \"");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral(".h\" },\r\n\t};\r\n#endif\r\n\tconst UECodeGen_Private::FFunctionParams Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral(", nullptr, \"ConstructEventParams\", nullptr, nullptr, Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::PropPointers), sizeof(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventConstructEventParams_Parms), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00020401, 0, 0, METADATA_PARAMS(UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::Function_MetaDataParams), Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::Function_MetaDataParams) };\r\n\tstatic_assert(UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::PropPointers) < 2048);\r\n\tstatic_assert(sizeof(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventConstructEventParams_Parms) < MAX_uint16);\r\n\tUFunction* Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams()\r\n\t{\r\n\t\tstatic UFunction* ReturnFunction = nullptr;\r\n\t\tif (!ReturnFunction)\r\n\t\t{\r\n\t\t\tUECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_ConstructEventParams_Statics::FuncParams);\r\n\t\t}\r\n\t\treturn ReturnFunction;\r\n\t}\r\n\tstruct Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics\r\n\t{\r\n\t\tstruct ");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventGetFunctionsForEvent_Parms\r\n\t\t{\r\n\t\t\tFName InEventName;\r\n\t\t};\r\n\t\tstatic const UECodeGen_Private::FNamePropertyParams NewProp_InEventName;\r\n\t\tstatic const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];\r\n#if WITH_METADATA\r\n\t\tstatic const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];\r\n#endif\r\n\t\tstatic const UECodeGen_Private::FFunctionParams FuncParams;\r\n\t};\r\n\tconst UECodeGen_Private::FNamePropertyParams Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::NewProp_InEventName = { \"InEventName\", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Name, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventGetFunctionsForEvent_Parms, InEventName), METADATA_PARAMS(0, nullptr) };\r\n\tconst UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::PropPointers[] = {\r\n\t\t(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::NewProp_InEventName,\r\n\t};\r\n#if WITH_METADATA\r\n\tconst UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::Function_MetaDataParams[] = {\r\n#if !UE_BUILD_SHIPPING\r\n\t\t{ \"Comment\", \"/*UFUNCTION()\\n\\x09TMap<FName, TArray<FName>> GetEventFunctionNameMap()\\n\\x09{\\n\\x09\\x09return Z_EventFunctionNameMap;\\n\\x09}*/\" },\r\n#endif\r\n\t\t{ \"ModuleRelativePath\", \"");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral(".h\" },\r\n#if !UE_BUILD_SHIPPING\r\n\t\t{ \"ToolTip\", \"UFUNCTION()\\n       TMap<FName, TArray<FName>> GetEventFunctionNameMap()\\n       {\\n               return Z_EventFunctionNameMap;\\n       }\" },\r\n#endif\r\n\t};\r\n#endif\r\n\tconst UECodeGen_Private::FFunctionParams Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral(", nullptr, \"GetFunctionsForEvent\", nullptr, nullptr, Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::PropPointers), sizeof(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventGetFunctionsForEvent_Parms), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00020401, 0, 0, METADATA_PARAMS(UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::Function_MetaDataParams), Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::Function_MetaDataParams) };\r\n\tstatic_assert(UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::PropPointers) < 2048);\r\n\tstatic_assert(sizeof(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral("_eventGetFunctionsForEvent_Parms) < MAX_uint16);\r\n\tUFunction* Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent()\r\n\t{\r\n\t\tstatic UFunction* ReturnFunction = nullptr;\r\n\t\tif (!ReturnFunction)\r\n\t\t{\r\n\t\t\tUECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetFunctionsForEvent_Statics::FuncParams);\r\n\t\t}\r\n\t\treturn ReturnFunction;\r\n\t}");
+        string text = val.ToStringAndClear();
+        string text2 = text;
+        val.AppendLiteral("struct Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap_Statics\r\n\t{\r\n#if WITH_METADATA\r\n\t\tstatic const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];\r\n#endif\r\n\t\tstatic const UECodeGen_Private::FFunctionParams FuncParams;\r\n\t};\r\n#if WITH_METADATA\r\n\tconst UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap_Statics::Function_MetaDataParams[] = {\r\n#if !UE_BUILD_SHIPPING\r\n\t\t{ \"Comment\", \"/*TMap<FName, TArray<FName>> Z_EventFunctionNameMap = {\\n\\x09\\x09{\\n\\x09\\x09\\x09\\\"Event.MyEvent\\\",\\n\\x09\\x09\\x09{\\n\\x09\\x09\\x09\\x09\\\"MyEvent\\\"\\n\\x09\\x09\\x09}\\n\\x09\\x09}\\n\\x09};*/\" },\r\n#endif\r\n\t\t{ \"ModuleRelativePath\", \"");
+        val.AppendFormatted(fileInfo.Class.Type?.EngineName);
+        val.AppendLiteral(".h\" },\r\n#if !UE_BUILD_SHIPPING\r\n\t\t{ \"ToolTip\", \"TMap<FName, TArray<FName>> Z_EventFunctionNameMap = {\\n               {\\n                       \\\"Event.MyEvent\\\",\\n                       {\\n                               \\\"MyEvent\\\"\\n                       }\\n               }\\n       };\" },\r\n#endif\r\n\t};\r\n#endif\r\n\tconst UECodeGen_Private::FFunctionParams Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral(", nullptr, \"GetEventFunctionNameMap\", nullptr, nullptr, nullptr, 0, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00020401, 0, 0, METADATA_PARAMS(UE_ARRAY_COUNT(Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap_Statics::Function_MetaDataParams), Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap_Statics::Function_MetaDataParams) };\r\n\tUFunction* Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap()\r\n\t{\r\n\t\tstatic UFunction* ReturnFunction = nullptr;\r\n\t\tif (!ReturnFunction)\r\n\t\t{\r\n\t\t\tUECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_");
+        val.AppendFormatted(fileInfo.Class.Type?.SourceName);
+        val.AppendLiteral("_GetEventFunctionNameMap_Statics::FuncParams);\r\n\t\t}\r\n\t\treturn ReturnFunction;\r\n\t}");
+        text = text2 + val.ToStringAndClear();
+        HunkText.Add(text);
+    }
+}
